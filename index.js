@@ -1,12 +1,13 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config()
 
 const port = 5000;
 const app = express();
 //middleware
 app.use(cors());
+app.use(express.json());
 
 //server running
 app.get('/', (req, res) => {
@@ -33,8 +34,32 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
 
+
         // Connect to the "insertDB" database and access its "haiku" collection
         const tendersDB = client.db("tendersDB").collection('tender');
+        //POST data
+        app.post('/tenders', async (req, res) => {
+            console.log(req.body)
+            const newTender = req.body;
+            const result = await tendersDB.insertOne(newTender)
+            res.send(result)
+        })
+
+        //GET data
+        app.get('/tenders', async (req, res) => {
+            const cursor = tendersDB.find();
+            const result = await cursor.toArray();
+            res.send(result)
+        })
+
+        //Delete Data 
+        app.delete('/tenders/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await tendersDB.deleteOne(query);
+            res.send(result);
+        })
+
 
 
         // Send a ping to confirm a successful connection
