@@ -51,6 +51,38 @@ async function run() {
             const result = await cursor.toArray();
             res.send(result)
         })
+        //Get data id Wise
+        app.get('/tender/:id', async (req, res) => {
+            const id = req.params.id;
+
+            const query = { _id: new ObjectId(id) };
+            const result = await tendersDB.findOne(query);
+
+            res.send(result);
+        })
+
+        //Update data
+
+        app.put('/tender/:id', async (req, res) => {
+            const id = req.params.id;
+            const updatedTender = req.body;
+
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateTender = {
+                $set: {
+                    scope: updatedTender.scope,
+                    caller: updatedTender.caller,
+                    schedulePrice: updatedTender.schedulePrice,
+                    security: updatedTender.security,
+                    method: updatedTender.method
+                }
+            }
+            const result = await tendersDB.updateOne(filter, updateTender, options);
+
+            res.send(result);
+
+        })
 
         //Delete Data 
         app.delete('/tenders/:id', async (req, res) => {
